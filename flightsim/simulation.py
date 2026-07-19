@@ -28,13 +28,15 @@ class FlightSimulator:
     def run(self):
         """Run the flight simulation."""
         # Integrate the equations of motion using odeint
-        solution = odeint(self.equations_of_motion, self.initial_conditions, self.time_span)
-        return solution
+        solution, info = odeint(self.equations_of_motion, self.initial_conditions, self.time_span, full_output=True, mxstep=5000)
+        return solution, info
     
     def equations_of_motion(self, state, t):
         """Define the equations of motion for the rocket."""
         # Unpack state variables
         x, y, vx, vy, theta = state
+        theta = theta % (2 * np.pi)  # Normalize angle to [0, 2*pi]
+        gamma = np.arctan2(vy, vx)  # Flight path angle
         
         # Compute forces and moments (placeholder)
         # In a real implementation, you would calculate aerodynamic forces,
@@ -46,8 +48,8 @@ class FlightSimulator:
         # Linear dynamics given mass, rotation, and aerodynamic coefficients
         g = 9.81  # Gravity [m/s^2]
         Cd = self.rocket.Cd[0]  # Placeholder: use the first element of Cd for simplicity
-        ax = -q * Cd * np.cos(theta) / self.rocket.mass
-        ay = -g - q * Cd * np.sin(theta) / self.rocket.mass
+        ax = -q * Cd * np.cos(gamma) / self.rocket.mass
+        ay = -g - q * Cd * np.sin(gamma) / self.rocket.mass
         
         # Rotational dynamics given moment of inertia and aerodynamic moment coefficients
         Cm = self.rocket.Cm[0] # Placeholder: use the first element of Cm for simplicity
