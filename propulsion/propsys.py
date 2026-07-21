@@ -2,12 +2,13 @@
 
 import numpy as np
 from scipy.optimize import fsolve
+from rocketdesign.component import Component
 
 # Module docstring
 __all__ = ["Engine", "Tank"]
 
 
-class Engine:
+class Engine(Component):
     """Engine class representing an engine's physical properties and state.
 
     Attributes:
@@ -21,11 +22,9 @@ class Engine:
         R (float): Specific gas constant for the exhaust gases [J/(kg*K)]
     """
     
-    def __init__(self, size: tuple, mass: float, MOI: np.ndarray, At: float, Ae: float, Tc: float, gamma: float, R: float):
+    def __init__(self, dimensions: tuple, density: float, At: float = 0.0, Ae: float = 0.0, Tc: float = 0.0, gamma: float = 1.4, R: float = 287.0):
         """Initialize an Engine instance with given physical properties."""
-        self.size = size
-        self.mass = mass
-        self.MOI = MOI
+        Component.__init__(self, dimensions, density, shape="cylinder")
         self.At = At
         self.Ae = Ae
         self.Tc = Tc
@@ -71,7 +70,7 @@ class Engine:
         M = fsolve(func, 1.0 + 0.1 if supersonic else 0.5)[0]
         return M[0]
     
-class Tank:
+class Tank(Component):
     """Tank class representing a propellant tank's physical properties and state.
 
     Attributes:
@@ -80,9 +79,6 @@ class Tank:
         MOI (np.ndarray): Moment of inertia tensor of the tank [kg*m^2]
     """
     
-    def __init__(self, size: tuple, mass: float, MOI: np.ndarray):
-        """Initialize a Tank instance with given physical properties.
-           (PLACEHOLDER)"""
-        self.size = size
-        self.mass = mass
-        self.MOI = MOI
+    def __init__(self, dimensions: tuple, density):
+        """Initialize a Tank instance with given physical properties."""
+        Component.__init__(self, dimensions, density, shape="cylinder")
