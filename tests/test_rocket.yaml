@@ -1,0 +1,16 @@
+name: testrocket
+components:
+  - Engine:
+        dimensions: [1.0, 0.5]  # meters
+        dry_density: 2700      # kg/m^3
+        At: 1e-4                # m^2
+        Ae: 1e-3                # m^2
+        Tc: 3000                # K
+        gamma: 1.4
+        R: 287                  # J/(kg*K)
+  - Tank:
+        dimensions: [1.0, 0.5]  # meters
+        shell_density: 2700     # kg/m^3
+        propellant: "N2O"
+        prop_mass: 10           # kg
+        prop_temp: 100          # K
