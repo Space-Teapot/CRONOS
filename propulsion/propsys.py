@@ -12,7 +12,7 @@ class Engine(Component):
     """Engine class representing an engine's physical properties and state.
 
     Attributes:
-        size (tuple): Dimensions of the engine (length, diameter) [m]
+        dimensions (tuple): Dimensions of the engine (length, diameter) [m]
         mass (float): Mass of the engine [kg]
         MOI (np.ndarray): Moment of inertia tensor of the engine [kg*m^2]
         At (float): Throat area of the nozzle [m^2]
@@ -22,9 +22,9 @@ class Engine(Component):
         R (float): Specific gas constant for the exhaust gases [J/(kg*K)]
     """
     
-    def __init__(self, dimensions: tuple, density: float, At: float = 0.0, Ae: float = 0.0, Tc: float = 0.0, gamma: float = 1.4, R: float = 287.0):
+    def __init__(self, dimensions: tuple, dry_density: float, At: float = 0.0, Ae: float = 0.0, Tc: float = 0.0, gamma: float = 1.4, R: float = 287.0):
         """Initialize an Engine instance with given physical properties."""
-        Component.__init__(self, dimensions, density, shape="cylinder")
+        Component.__init__(self, dimensions, dry_density, shape="cyl")
         self.At = At
         self.Ae = Ae
         self.Tc = Tc
@@ -50,7 +50,7 @@ class Engine(Component):
         mdot = Pe * self.Ae * Ve / (self.R * Te)
         
         # Calculate thrust and specific impulse
-        thrust = mdot * Ve + (Pa - Pe) * self.Ae
+        thrust = mdot * Ve + (Pe - Pa) * self.Ae
         isp = thrust / (mdot * 9.80665)  # Convert to specific impulse in seconds
         
         return thrust, isp
@@ -68,17 +68,33 @@ class Engine(Component):
         def func(M):
             return (1 / M) * ((2 / (self.gamma + 1)) * (1 + (self.gamma - 1) / 2 * M ** 2)) ** ((self.gamma + 1) / (2 * (self.gamma - 1))) - A_Astar
         M = fsolve(func, 1.0 + 0.1 if supersonic else 0.5)[0]
-        return M[0]
+        return M
     
 class Tank(Component):
     """Tank class representing a propellant tank's physical properties and state.
 
     Attributes:
-        size (tuple): Dimensions of the tank (length, diameter) [m]
+        dimensions (tuple): Dimensions of the tank (length, diameter) [m]
         mass (float): Mass of the tank [kg]
         MOI (np.ndarray): Moment of inertia tensor of the tank [kg*m^2]
     """
     
-    def __init__(self, dimensions: tuple, density):
+    def __init__(self, dimensions: tuple, shell_density: float, propellant, prop_mass: float, prop_temp: float):
         """Initialize a Tank instance with given physical properties."""
-        Component.__init__(self, dimensions, density, shape="cylinder")
+        Component.__init__(self, dimensions, shell_density, "cyl")
+        self.prop_mass = prop_mass  # kg
+        self.prop_temp = prop_temp  # K
+
+        # PLACEHOLDER propellant data, will interpolate from tabulated data or something
+        if propellant == "N2O":
+            self.rho0 = self.prop_mass / self.volume  # kg/m^3
+            self.R = 287  # J/(kg*K)
+            self.gamma = 1.4
+            self.P0 = self.rho0 * self.R * self.prop_temp  # Pa
+        elif propellant == "ethanol":
+            self.rho0 = self.prop_mass / self.volume  # kg/m^3
+            self.R = 287  # J/(kg*K)
+            self.gamma = 1.4
+            self.P0 = self.rho0 * self.R * self.prop_temp  # Pa
+        else:
+            raise ValueError("Unsupported propellant type. Supported types: 'N2O', 'ethanol'.")

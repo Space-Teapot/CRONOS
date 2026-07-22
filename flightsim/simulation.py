@@ -38,12 +38,10 @@ class FlightSimulator:
         theta = theta % (2 * np.pi)  # Normalize angle to [0, 2*pi]
         gamma = np.arctan2(vy, vx)  # Flight path angle
         
-        # Compute forces and moments (placeholder)
-        # In a real implementation, you would calculate aerodynamic forces,
-        # thrust, gravity, etc., based on the rocket's properties and state.
+        # Compute forces and moments (WORK IN PROGRESS)
         
         # Calculate dynamic pressure and aerodynamic forces
-        q = 0.5 * self.atmospheric_conditions(y)[2][0] * (vx**2 + vy**2)  # Dynamic pressure
+        q = 0.5 * self.atmospheric_conditions(y)[2][0] * (vx**2 + vy**2)
         
         # Linear dynamics given mass, rotation, and aerodynamic coefficients
         g = 9.81  # Gravity [m/s^2]
